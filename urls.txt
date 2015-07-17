@@ -4,3 +4,9 @@ https://www.apple.com
 https://www.hotmail.com
 https://www.gmail.com
 http://start.fedoraproject.org/
+https://www.live.com
+https://www.msn.com
+https://www.microsoft.com
+https://www.paytm.com
+http://www.flipcart.com
+https://www.amazon.com

@@ -26,13 +26,16 @@ class urlFetch(threading.Thread):
 		fileName=fileName.replace("www.","")
 		fileName=fileName.replace("/","_")
 		fileName='data/'+fileName
-		fileObj=file(fileName,'wb+')
-		for chunk in response.iter_content((1024 * 5)):
-			fileObj.write(chunk)
-		fileObj.close()
+		try:
+			fileObj=file(fileName,'wb+')
+			for chunk in response.iter_content((1024 * 5)):
+				fileObj.write(chunk)
+		finally:
+			fileObj.close()
 	
 	#Controlling the fetching operation
 	def fetchURL(self):
+		global success
 		url=self.url
 		url=url.strip()
 		#print self.threadID," -  Fetching started "
@@ -41,6 +44,7 @@ class urlFetch(threading.Thread):
 			if response.status_code==200:
 				self.writeContents(url,response)
 				print self.threadID," ",url," - Success"
+				success=success+1
 			else:
 				print self.threadID," ",url," - Can\'t read Status Code:",response.status_code
 		except ConnectionError as e:
@@ -62,6 +66,20 @@ urls=readURLs('urls.txt')
 if os.path.isdir('data')==False:
 	os.mkdir('data',0755)
 
+#this variables are used only to detect completion rate
+success=0
+threads=[]
+
 #Creating threads for url fetching operation and start
 for count in range(len(urls)):
-	urlFetch(urls[count],count).start()
+	#urlFetch(urls[count],count).start()	
+	thread=urlFetch(urls[count],count)
+	threads.append(thread)
+	thread.start()
+	thread=None
+
+for thread in threads:
+	thread.join()
+
+print "\n",success," URLs successfully fetched out of total ",len(urls)," URLs"
+print "Completion Rate: ", (100*float(success)/ float(len(urls))),"%"
